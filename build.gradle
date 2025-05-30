@@ -13,6 +13,26 @@ repositories {
 }
 
 dependencies {
+    // Utilities
+    // logging
+    implementation 'org.slf4j:slf4j-api:2.0.17'
+    implementation 'ch.qos.logback:logback-classic:1.5.18'
+    // jackson-databind
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.19.0'
+    // lombok
+    compileOnly("org.projectlombok:lombok:1.18.38")
+    annotationProcessor("org.projectlombok:lombok:1.18.38")
+
+    // Test dependencies
+    testCompileOnly("org.projectlombok:lombok:1.18.38")
+    testAnnotationProcessor("org.projectlombok:lombok:1.18.38")
+
+    testImplementation 'org.mockito:mockito-core:5.4.0'
+    testImplementation 'org.mockito:mockito-junit-jupiter:5.4.0'
+
+    //wiremock
+    testImplementation 'com.github.tomakehurst:wiremock:3.0.1'
+
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
 }
@@ -182,3 +202,18 @@ githook {
 }
 
 // git hook end
+
+
+tasks.register("recordingTest", Test) {
+    description = "Recording WireMock tests for verification"
+    group = "verification"
+
+    // 환경변수 전달
+    environment "WIREMOCK_RECORDING", "true"
+
+    useJUnitPlatform()
+
+    // 나머지 test 설정을 main test 태스크와 같게 하고 싶다면:
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+}
