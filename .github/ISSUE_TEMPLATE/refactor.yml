@@ -1,0 +1,32 @@
+name: Refactor Template
+description: If you want to refactor, use this template.
+title: "[Refactor] Refactor Title"
+labels: ["refactoring"]
+
+body:
+    - type: textarea
+      id: refactor-explanation
+      attributes:
+          label: Refactor explanation
+          description: Write a description of the refactoring you want to do.
+          placeholder: ex) Simplify the code
+      validations:
+          required: true
+
+    - type: input
+      id: related-issue
+      attributes:
+          label: Related Issue or PR
+          description: If there is a related issue or PR, please write it down.
+          placeholder: "ex. - #14"
+      validations:
+          required: false
+
+    - type: textarea
+      id: etc
+      attributes:
+          label: etc
+          description: If you have anything else to write, please write it down.
+          placeholder: Reference link, ... etc
+      validations:
+          required: false

@@ -1,0 +1,1 @@
+memberSearchIndex = [{"p":"org.tosspayments.sdk","c":"TossPayments","l":"method(Boolean)","u":"method(java.lang.Boolean)"},{"p":"org.tosspayments.sdk","c":"TossPayments","l":"TossPayments()","u":"%3Cinit%3E()"}];updateSearchResults();

@@ -1,0 +1,70 @@
+#!/bin/sh
+
+# Path to the commit message file
+MSG_FILE="$1"
+COMMIT_MSG=$(< "$MSG_FILE")
+
+# Conventional commit types list: first letter uppercase, rest lowercase
+TYPES_LIST=(Build Chore Ci Docs Feat Fix Perf Refactor Revert Style Test Merge Init)
+# Build TYPE regex
+TYPE_REGEX=$(printf "%s|" "${TYPES_LIST[@]}" | sed 's/|$//')
+# Regex for subject: e.g. "Type(scope)!?: subject"
+SUBJECT_REGEX="^($TYPE_REGEX)(\([A-Za-z0-9_-]+\))?(!)?: .+"
+
+# Print error and exit
+error() {
+  echo "ERROR: $1"
+  exit 1
+}
+
+# Skip Init, Revert, Merge commits (with optional !)
+if echo "$COMMIT_MSG" | grep -Eq "^(Init|Revert|Merge)(!)?"; then
+  exit 0
+fi
+
+# Read message lines
+mapfile -t LINES <<< "$COMMIT_MSG"
+SUBJECT_LINE="${LINES[0]}"
+
+# Extract type (letters only, before scope or !)
+TYPE=$(echo "$SUBJECT_LINE" | sed -E 's/^([A-Za-z]+).*/\1/')
+
+# 1. Validate type casing: first uppercase, rest lowercase
+if ! echo "$TYPE" | grep -Eq '^[A-Z][a-z]+$'; then
+  error "Invalid type casing: '$TYPE'. Type must start uppercase followed by lowercase."
+fi
+# 2. Validate type allowed
+if ! [[ " ${TYPES_LIST[*]} " =~ " $TYPE " ]]; then
+  error "Invalid commit type: '$TYPE'. Allowed types are: ${TYPES_LIST[*]}"
+fi
+# 3. Validate subject format including optional scope and breaking '!' indicator
+if ! echo "$SUBJECT_LINE" | grep -Eq "$SUBJECT_REGEX"; then
+  error "Invalid format: subject must follow 'Type(scope)?(!)?: subject'"
+fi
+# 4. Subject length <= 50 chars
+LEN=${#SUBJECT_LINE}
+if [ "$LEN" -gt 50 ]; then
+  error "Subject too long: ${LEN} characters (limit: 50)"
+fi
+# 5. Blank line between subject and body
+if [ "${LINES[1]}" != "" ]; then
+  error "Formatting error: missing blank line between subject and body"
+fi
+# 6. Body and footer checks
+prev=""
+for ((i=2; i<${#LINES[@]}; i++)); do
+  line="${LINES[i]}"; num=$((i+1))
+  # Footer detection KEY: value
+  if echo "$line" | grep -Eq '^[A-Za-z-]+: .+'; then
+    [ "$prev" = "" ] || error "Missing blank line before footer at line ${num}"
+  else
+    # Body length <= 72 chars
+    if [ ${#line} -gt 72 ]; then
+      error "Line ${num} too long: ${#line} characters (limit: 72)"
+    fi
+  fi
+  prev="$line"
+done
+
+# All checks passed
+exit 0

@@ -1,0 +1,51 @@
+name: Semantic Release
+
+on:
+    push:
+        branches:
+            - release
+
+jobs:
+    semantic-release:
+        name: Semantic Release
+
+        permissions:
+            contents: write
+            packages: write
+
+        runs-on: ubuntu-latest
+
+        steps:
+            # checkout (fetch-depth: 0 gets all history for tags)
+            - uses: actions/checkout@v3
+              with:
+                fetch-depth: 0
+
+            # JDK 17
+            - name: Set up JDK 17
+              uses: actions/setup-java@v3
+              with:
+                java-version: '17'
+                distribution: 'temurin'
+
+            # for semantic-release
+            - name: Setup Node.js
+              uses: actions/setup-node@v3
+
+            # install semantic-release related package
+            # @semantic-release/git: automate git commit and tag
+            # @semantic-release/changelog: generate changelog.md
+            - name: Install dependencies
+              run: npm install -g semantic-release @semantic-release/git @semantic-release/changelog conventional-changelog-conventionalcommits
+
+            # Gradle cache
+            - name: Cache Gradle packages
+              uses: actions/cache@v3
+              with:
+                path: ~/.gradle/caches
+                key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
+
+            - name: Run semantic-release
+              env:
+                GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: npx semantic-release

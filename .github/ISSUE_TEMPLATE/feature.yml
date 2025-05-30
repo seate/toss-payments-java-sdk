@@ -1,0 +1,32 @@
+name: Feature Template
+description: If you want to add a new feature, use this template.
+title: "[Feature] Feature Title"
+labels: ["enhancement"]
+
+body:
+    - type: textarea
+      id: feature-contents
+      attributes:
+          label: Feature explanation
+          description: Write a description of the feature you want to add.
+          placeholder: ex. support v1 API
+      validations:
+          required: true
+
+    - type: input
+      id: related-issue
+      attributes:
+          label: Related issue or PR
+          description: If there is a related issue or PR, please write it down.
+          placeholder: "ex. - #14"
+      validations:
+          required: false
+
+    - type: textarea
+      id: etc
+      attributes:
+          label: etc
+          description: If you have anything else to write, please write it down.
+          placeholder: Reference link, ... etc
+      validations:
+          required: false

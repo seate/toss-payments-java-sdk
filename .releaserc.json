@@ -1,0 +1,63 @@
+{
+    "branches": ["release"],
+    "plugins": [
+        [
+            "@semantic-release/commit-analyzer",
+            {
+                "preset": "angular",
+                "releaseRules": [
+                    { "type": "Merge", "release": false },
+                    { "type": "docs", "release": "patch" },
+                    { "type": "refactor", "release": "minor" },
+                    { "scope": "no-release", "release": false }
+                ],
+                "parserOpts": {
+                    "noteKeywords": [
+                        "BREAKING CHANGE",
+                        "BREAKING CHANGES"
+                    ]
+                }
+            }
+        ],
+        [
+            "@semantic-release/release-notes-generator",
+            {
+                "preset": "conventionalcommits",
+                "presetConfig": {
+                    "types": [
+                        { "type": "Feat", "section": "✨ Features", "hidden": false },
+                        { "type": "Fix", "section": "🐛 Bug Fixes", "hidden": false },
+                        { "type": "Perf", "section": "🌈 Performance", "hidden": false },
+                        { "type": "Refactor", "section": "♻️ Refactor", "hidden": false },
+                        { "type": "Docs", "section": "📝 Docs", "hidden": false },
+                        { "type": "Style", "section": "💄 Styles", "hidden": false },
+                        { "type": "Revert", "section": "🕐 Reverts", "hidden": false },
+                        { "type": "CI", "section": "💫 CI/CD", "hidden": false },
+
+                        { "type": "Test", "section": "✅ Tests", "hidden": true },
+                        { "type": "Chore", "section": "📦 Chores", "hidden": true },
+                        { "type": "Move", "section": "🚚 Move Files", "hidden": true },
+                        { "type": "Remove", "section": "🔥 Remove Files", "hidden": true }
+                    ]
+                }
+            }
+        ],
+        [
+            "@semantic-release/changelog",
+            {
+                "changelogFile": "CHANGELOG.md",
+                "changelogTitle": "# 🚦 CHANGELOG"
+            }
+        ],
+        "@semantic-release/github",
+        [
+            "@semantic-release/git",
+            {
+                "assets": [
+                    "CHANGELOG.md"
+                ],
+                "message": "chore(release): ${nextRelease.version}\n\n${nextRelease.notes}"
+            }
+        ]
+    ]
+}

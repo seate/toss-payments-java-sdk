@@ -1,0 +1,184 @@
+plugins {
+    id 'java'
+    id 'checkstyle'
+    id 'jacoco'
+    id "com.star-zero.gradle.githook" version "1.2.1"
+}
+
+group = 'org.example'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+// code convention check start
+
+compileJava.options.encoding = 'UTF-8'
+compileTestJava.options.encoding = 'UTF-8'
+
+tasks.withType(Checkstyle).configureEach {
+    reports {
+        xml.required = true
+        html.required = true
+    }
+}
+
+checkstyle {
+    toolVersion = "10.12.4"
+    ignoreFailures = false
+    maxWarnings = 0
+    configFile = file("config/checkstyle/naver-checkstyle-rules.xml")
+    configProperties = ["suppressionFile": "config/checkstyle/naver-checkstyle-suppressions.xml"]
+}
+
+checkstyleMain.source = fileTree('src/main/java')
+checkstyleTest.source = fileTree('src/test/java')
+
+// code convention check end
+
+
+// test coverage check start
+
+test {
+    useJUnitPlatform()
+    //finalizedBy jacocoTestReport // if you want to include test coverage in test, uncomment this line
+}
+
+jacoco {
+    toolVersion = '0.8.12'
+}
+
+jacocoTestReport {
+    dependsOn test
+
+    reports {
+        xml.required = true
+        html.required = true
+        csv.required = false
+    }
+
+    finalizedBy jacocoTestCoverageVerification
+}
+
+jacocoTestCoverageVerification {
+    dependsOn jacocoTestReport
+
+    violationRules {
+        rule { // total range
+            enabled = true
+
+            limit {
+                // counter's default is  'INSTRUCTION'
+                // value's default is 'COVEREDRATIO'
+                minimum = 0.30
+            }
+        }
+
+        rule {
+            enabled = true // rule ON, OFF
+
+            element = 'CLASS' // rule target
+
+            // branch coverage 90%
+            limit {
+                counter = 'BRANCH'
+                value = 'COVEREDRATIO'
+                minimum = 0.90
+            }
+
+            // line coverage 80%
+            limit {
+                counter = 'LINE'
+                value = 'COVEREDRATIO'
+                minimum = 0.80
+            }
+        }
+    }
+}
+
+tasks.register('testCoverage', Test) {
+    description = 'Runs the unit tests with coverage'
+    group = 'verification'
+
+    dependsOn(':test',
+            ':jacocoTestReport',
+            ':jacocoTestCoverageVerification')
+
+    jacocoTestReport.mustRunAfter test
+    jacocoTestCoverageVerification.mustRunAfter jacocoTestReport
+}
+
+// test coverage check end
+
+
+// javadoc document start
+
+javadoc {
+    description = 'Generate Javadoc API documentation.'
+    source = sourceSets.main.java.srcDirs
+    destinationDir = file("docs")
+    options.encoding = 'UTF-8'
+}
+
+tasks.register('testJavadocTest', Javadoc) {
+    description = 'Validates Javadoc comments in test code without generating output files.'
+    group = 'verification'
+    source = sourceSets.test.allJava
+    destinationDir = file("${buildDir}/tmp/javadocTest") // Temporary directory for test Javadoc output
+    classpath = sourceSets.test.compileClasspath // Include junit
+
+    options {
+        encoding = 'UTF-8'
+        memberLevel = JavadocMemberLevel.PACKAGE // package-private validation for test code
+    }
+
+    doLast {
+        delete(destinationDir) // Delete directory after Javadoc validation
+    }
+}
+
+tasks.register('totalJavadocTest', Test) {
+    description = 'Total Javadoc validation task.'
+    group = 'verification'
+
+    dependsOn(':javadoc', ':testJavadocTest')
+}
+
+// javadoc document end
+
+
+// total CI test start
+
+tasks.register('totalCITest', Test) {
+    description = 'Total CI test task.'
+    group = 'verification'
+
+    dependsOn(':totalJavadocTest', ':testCoverage', ':check')
+}
+
+// total CI test end
+
+
+// git hook start
+
+githook {
+    hooksDir = file(new File(rootDir, ".git/hooks"))
+    createHooksDirIfNotExist = true
+    hooks {
+        'commit-msg' {
+            shell = file('config/githook/commit-msg').text
+        }
+    }
+}
+
+// git hook end

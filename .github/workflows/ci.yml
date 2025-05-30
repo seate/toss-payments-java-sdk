@@ -1,0 +1,56 @@
+name: CI Test
+
+on: [pull_request]
+
+jobs:
+    CITest:
+        name: CI Test
+
+        permissions:
+            pull-requests: write
+            checks: write
+            contents: read
+
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4.2.2
+
+            - name: Set up JDK 17
+              uses: actions/setup-java@v4.7.0
+              with:
+                  java-version: '17'
+                  distribution: 'temurin'
+
+            - name: Grant execute permission for gradlew
+              run: chmod +x gradlew
+
+            - name: Test with Gradle
+              run: ./gradlew clean totalCITest
+
+    checkstyle:
+        name: Check Code Convention
+
+        permissions:
+            pull-requests: write
+            checks: write
+            contents: read
+
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4.2.2
+
+            - name: Run Checkstyle
+              uses: dbelyaev/action-checkstyle@master
+              with:
+                  github_token: ${{ secrets.github_token }}
+                  reporter: github-pr-review
+                  level: warning
+                  fail_level: warning
+                  checkstyle_config: ./config/checkstyle/naver-checkstyle-rules.xml
+                  properties_file: ./config/checkstyle/checkstyle.properties
+                  reviewdog_flags: '-tee'
+                  filter_mode: 'file'

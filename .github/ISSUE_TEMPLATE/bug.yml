@@ -1,0 +1,41 @@
+name: Bug Template
+description: Issue about bug
+title: "[Bug] Bug Title"
+labels: ["bug"]
+
+body:
+    - type: textarea
+      id: bug-explanation
+      attributes:
+          label: Bug explanation
+          description: Description of the bug
+          placeholder: ex) field not matched
+      validations:
+          required: true
+
+    - type: input
+      id: related-issue-or-pr
+      attributes:
+          label: Related issue or PR
+          description: If there is a related issue or PR, please write it down.
+          placeholder: "ex. - #14"
+      validations:
+          required: false
+
+    - type: textarea
+      id: bug-fix-suggestions
+      attributes:
+          label: suggestion for bug fix
+          description: If you have any suggestions for bug fixes, please write them down.
+          placeholder: ex) update field
+      validations:
+          required: false
+
+    - type: textarea
+      id: etc
+      attributes:
+          label: etc
+          description: If you have anything else to write, please write it down.
+          placeholder: reference link, ... etc
+      validations:
+          required: false
