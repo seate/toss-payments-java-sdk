@@ -1,22 +1,27 @@
 package org.tosspayments.sdk;
 
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 import org.junit.jupiter.api.Test;
+import org.tosspayments.sdk.request.requester.Requester;
+import org.tosspayments.sdk.util.toss.TossTestInform;
 
 /**
- * You must document test class
+ * Tests for {@link TossPayments}.
  */
 class TossPaymentsTest {
 
+
 	/**
-	 * You must document test method
+	 * Tests the initialization of {@link TossPayments} with a secret key.
+	 * This test ensures that the TossPayments instance can be created without exceptions.
 	 */
 	@Test
-	void method() {
-		TossPayments tossPayments = new TossPayments();
+	void tossPaymentsInitializationTest() {
+		TossPayments tossPayments = new TossPayments(TossTestInform.getSecret());
 
-		assertTrue(tossPayments.method(true));
+		Requester mockRequester = mock(Requester.class);
+		TossPayments tossPaymentsWithCustomRequester = new TossPayments(TossTestInform.getSecret(), mockRequester);
 	}
 }

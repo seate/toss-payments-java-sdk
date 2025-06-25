@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Path to the commit message file
 MSG_FILE="$1"
